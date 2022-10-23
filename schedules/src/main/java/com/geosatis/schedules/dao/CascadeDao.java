@@ -1,6 +1,8 @@
 package com.geosatis.schedules.dao;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.DataSource;
 
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+
+import com.geosatis.schedules.entities.QueryData;
 
 @Repository
 public class CascadeDao {
@@ -28,20 +32,21 @@ public class CascadeDao {
     }
 
     @Transactional
-    boolean executeQueries(Map<String, String> queries, MapSqlParameterSource mapSqlParameterSource) {
+    boolean executeQueries(List<QueryData> queryDataList) {
+        AtomicBoolean executedSuccessfully = new AtomicBoolean(true);
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         TransactionStatus status = dataSourceTransactionManager.getTransaction(def);
-        for (Map.Entry<String, String> query : queries.entrySet()) {
+        queryDataList.forEach(queryData -> {
             try {
-                int updatedRows = namedParameterJdbcTemplate.update(query.getValue(), mapSqlParameterSource);
+                int updatedRows = namedParameterJdbcTemplate.update(queryData.getQueryString(), queryData.getSqlParameters());
+                // LOG.info("{} rows from table {} were updated", updatedRows, query.getTableName());
             } catch (Exception e) {
                 dataSourceTransactionManager.rollback(status);
-                return false;
+                executedSuccessfully.set(false);
             }
-        }
+        });
 
         dataSourceTransactionManager.commit(status);
-
-        return true;
+        return executedSuccessfully.get();
     }
 }

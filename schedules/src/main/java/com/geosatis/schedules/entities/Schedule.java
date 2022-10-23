@@ -1,7 +1,7 @@
 package com.geosatis.schedules.entities;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Schedule {
@@ -10,9 +10,9 @@ public class Schedule {
 
     private String name;
 
-    private Date startDate;
+    private Instant startDate;
 
-    private Date endDate;
+    private Instant endDate;
 
     private boolean active;
 
@@ -34,19 +34,19 @@ public class Schedule {
         this.name = name;
     }
 
-    public Date getStartDate() {
+    public Instant getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(Instant startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public Instant getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(Instant endDate) {
         this.endDate = endDate;
     }
 

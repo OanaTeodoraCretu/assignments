@@ -3,8 +3,6 @@ package com.geosatis.schedules.entities;
 import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.geosatis.schedules.utils.TimeDeserializer;
 
 public class Series {
 
@@ -18,11 +16,13 @@ public class Series {
 
     private long freqTypeId;
 
-    private int freqInterval;
+    private int freqIntervalId;
 
-    private long exceptionId;
+    private Exception exception;
 
     private long scheduleId;
+
+    private int repeatIntervalValue;
 
     public Long getSeriesId() {
         return seriesId;
@@ -56,20 +56,20 @@ public class Series {
         this.freqTypeId = freqTypeId;
     }
 
-    public int getFreqInterval() {
-        return freqInterval;
+    public int getFreqIntervalId() {
+        return freqIntervalId;
     }
 
-    public void setFreqInterval(int freqInterval) {
-        this.freqInterval = freqInterval;
+    public void setFreqIntervalId(int freqIntervalId) {
+        this.freqIntervalId = freqIntervalId;
     }
 
-    public long getExceptionId() {
-        return exceptionId;
+    public Exception getException() {
+        return exception;
     }
 
-    public void setExceptionId(long exceptionId) {
-        this.exceptionId = exceptionId;
+    public void setException(Exception exception) {
+        this.exception = exception;
     }
 
     public long getScheduleId() {
@@ -78,5 +78,13 @@ public class Series {
 
     public void setScheduleId(long scheduleId) {
         this.scheduleId = scheduleId;
+    }
+
+    public int getRepeatIntervalValue() {
+        return repeatIntervalValue;
+    }
+
+    public void setRepeatIntervalValue(int repeatIntervalValue) {
+        this.repeatIntervalValue = repeatIntervalValue;
     }
 }
