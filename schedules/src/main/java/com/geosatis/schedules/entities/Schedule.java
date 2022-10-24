@@ -4,19 +4,34 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Schedule {
 
     private long scheduleId;
 
     private String name;
 
+    @JsonProperty("start_date")
     private Instant startDate;
 
+    @JsonProperty("end_date")
     private Instant endDate;
 
     private boolean active;
 
     private List<Series> seriesList = new ArrayList<>();
+
+    public Schedule() {
+    }
+
+    public Schedule(long scheduleId, Instant startDate, Instant endDate, String name, boolean active) {
+        this.scheduleId = scheduleId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.name = name;
+        this.active = active;
+    }
 
     public long getScheduleId() {
         return scheduleId;

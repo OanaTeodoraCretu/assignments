@@ -1,17 +1,19 @@
 package com.geosatis.schedules.dao;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.geosatis.schedules.entities.Exception;
 import com.geosatis.schedules.entities.QueryData;
 import com.geosatis.schedules.entities.Series;
 
@@ -27,7 +29,10 @@ public class SeriesDao {
 
     private static final String UPDATE_SERIES_BY_ID = "UPDATE series SET " + UPDATE_COLUMNS_PLACEHOLDER + " WHERE series_id = :series_id ";
 
+    private static final String GET_SERIES_FOR_SCHEDULE_ID = "SELECT * FROM series WHERE schedule_id = :schedule_id ";
+
     private ExceptionDao exceptionDao;
+
     @Autowired
     public SeriesDao(NamedParameterJdbcTemplate jdbcTemplate, ExceptionDao exceptionDao) {
         this.jdbcTemplate = jdbcTemplate;
@@ -36,7 +41,7 @@ public class SeriesDao {
 
     public boolean createSeries(Series series) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("start_hour",  Time.valueOf(series.getStartHour()));
+        sqlParameterSource.addValue("start_hour", Time.valueOf(series.getStartHour()));
         sqlParameterSource.addValue("end_hour", Time.valueOf(series.getEndHour()));
         sqlParameterSource.addValue("freq_type_id", series.getFreqTypeId());
         sqlParameterSource.addValue("freq_interval_id", series.getFreqIntervalId());
@@ -64,11 +69,41 @@ public class SeriesDao {
                 queries.add(exceptionDao.getUpdateExceptionQuery((LinkedHashMap) entry.getValue()));
             } else {
                 updateQueryStringBuilder.append(fieldName).append("=:").append(fieldName).append(",");
-                mapSqlParameterSource.addValue(entry.getKey(), entry.getValue());
+                mapSqlParameterSource.addValue(fieldName, entry.getValue());
             }
         }
 
         queries.add(new QueryData("series", UPDATE_SERIES_BY_ID.replace(UPDATE_COLUMNS_PLACEHOLDER, updateQueryStringBuilder.toString().replaceAll(".$", "")), mapSqlParameterSource));
         return queries;
+    }
+
+    public List<Series> getSeriesForScheduleId(long scheduleId) {
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+        mapSqlParameterSource.addValue("schedule_id", scheduleId);
+
+        return jdbcTemplate.query(GET_SERIES_FOR_SCHEDULE_ID, mapSqlParameterSource, new SeriesRSE());
+    }
+
+    private static class SeriesRSE implements ResultSetExtractor<List<Series>> {
+
+        @Override
+        public List<Series> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            List<Series> seriesForASchedule = new ArrayList<>();
+
+            while (rs.next()) {
+                Series series = new Series();
+                series.setSeriesId(rs.getLong(1));
+                series.setStartHour(rs.getTimestamp(2).toLocalDateTime().toLocalTime());
+                series.setEndHour(rs.getTimestamp(3).toLocalDateTime().toLocalTime());
+                series.setFreqTypeId(rs.getInt(4));
+                series.setFreqIntervalId(rs.getInt(5));
+                series.setScheduleId(rs.getLong(6));
+                series.setExceptionId(rs.getLong(7));
+                series.setRepeatIntervalValue(rs.getInt(8));
+                seriesForASchedule.add(series);
+            }
+
+            return seriesForASchedule;
+        }
     }
 }

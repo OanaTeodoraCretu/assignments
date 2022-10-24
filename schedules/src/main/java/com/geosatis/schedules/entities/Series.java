@@ -3,25 +3,36 @@ package com.geosatis.schedules.entities;
 import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Series {
 
+    @JsonProperty("series_id")
     private Long seriesId;
 
+    @JsonProperty("start_hour")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
     private LocalTime startHour;
 
+    @JsonProperty("end_hour")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
     private LocalTime endHour;
 
+    @JsonProperty("freq_type_id")
     private long freqTypeId;
 
+    @JsonProperty("freq_interval_id")
     private int freqIntervalId;
+
+    @JsonProperty("exception_id")
+    private long exceptionId;
 
     private Exception exception;
 
+    @JsonProperty("schedule_id")
     private long scheduleId;
 
+    @JsonProperty("repeat_interval_value")
     private int repeatIntervalValue;
 
     public Long getSeriesId() {
@@ -86,5 +97,13 @@ public class Series {
 
     public void setRepeatIntervalValue(int repeatIntervalValue) {
         this.repeatIntervalValue = repeatIntervalValue;
+    }
+
+    public long getExceptionId() {
+        return exceptionId;
+    }
+
+    public void setExceptionId(long exceptionId) {
+        this.exceptionId = exceptionId;
     }
 }

@@ -1,6 +1,9 @@
 package com.geosatis.schedules.controller;
 
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.geosatis.schedules.entities.Schedule;
+import com.geosatis.schedules.entities.Series;
 import com.geosatis.schedules.service.ScheduleService;
+import com.geosatis.schedules.service.SeriesService;
+import com.geosatis.schedules.util.DateConverter;
 
 @RestController
 @RequestMapping(path = "/api/schedule")
@@ -22,13 +28,11 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
-    public ScheduleController(ScheduleService scheduleService) {
-        this.scheduleService = scheduleService;
-    }
+    private final SeriesService seriesService;
 
-    @GetMapping("/hello")
-    public String sayHello(@RequestParam(value = "myName", defaultValue = "World") String name) {
-        return String.format("Hello %s!", name);
+    public ScheduleController(ScheduleService scheduleService, SeriesService seriesService) {
+        this.scheduleService = scheduleService;
+        this.seriesService = seriesService;
     }
 
     @PostMapping
@@ -43,5 +47,23 @@ public class ScheduleController {
         return new ResponseEntity<>(scheduleService.updateSchedule(scheduleId, newFieldValues), HttpStatus.OK);
     }
 
-
+    @PutMapping
+    public ResponseEntity<Boolean> updateScheduleForSpecificDate(@RequestParam String specificDate, @RequestBody Series series) {
+        Timestamp date = DateConverter.getTimestamp(specificDate);
+        if (date != null) {
+            List<Schedule> scheduleList = scheduleService.getSchedulesIdByDate(date);
+            // assuming that there are multiple schedules contain the specific date, exception should apply to all series from all schedules
+            AtomicBoolean success = new AtomicBoolean(true);
+            scheduleList.forEach(schedule -> {
+                try {
+                    seriesService.addNewExceptionToSeries(schedule, series);
+                } catch (UnsupportedOperationException ex) {
+                    success.set(false);
+                }
+            });
+            return new ResponseEntity<>(success.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

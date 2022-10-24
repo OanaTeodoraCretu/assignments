@@ -1,14 +1,12 @@
 package com.geosatis.schedules.service;
 
-import java.util.LinkedHashMap;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
-import com.geosatis.schedules.dao.CascadeDao;
 import com.geosatis.schedules.dao.ExceptionDao;
 import com.geosatis.schedules.dao.ScheduleDao;
 import com.geosatis.schedules.dao.SeriesDao;
@@ -25,16 +23,11 @@ public class ScheduleService {
 
     private final ExceptionDao exceptionDao;
 
-    private CascadeDao cascadeDao;
-
-    private final static String SERIES_LIST =  "seriesList";
-
     @Autowired
-    public ScheduleService(ScheduleDao scheduleDao, SeriesDao seriesDao, ExceptionDao exceptionDao, CascadeDao cascadeDao) {
+    public ScheduleService(ScheduleDao scheduleDao, SeriesDao seriesDao, ExceptionDao exceptionDao) {
         this.scheduleDao = scheduleDao;
         this.seriesDao = seriesDao;
         this.exceptionDao = exceptionDao;
-        this.cascadeDao = cascadeDao;
     }
 
     public boolean createNewSchedule(Schedule schedule) {
@@ -48,6 +41,7 @@ public class ScheduleService {
                 long exceptionId = exceptionDao.createException(exception);
                 if (exceptionId > 0) {
                     exception.setExceptionId(exceptionId);
+                    series.setExceptionId(exceptionId);
                 }
             }
             seriesDao.createSeries(series);
@@ -58,5 +52,19 @@ public class ScheduleService {
     public boolean updateSchedule(Long scheduleId, Map<String, Object> newFieldValues) {
         //checkInputs(scheduleId, newFieldValues);
         return scheduleDao.updateSchedule(scheduleId, newFieldValues);
+    }
+
+    public List<Schedule> getSchedulesIdByDate(Timestamp date) {
+        List<Schedule> scheduleList = scheduleDao.getSchedulesIdByDate(date);
+        scheduleList.forEach(schedule -> {
+            List<Series> seriesForASchedule = seriesDao.getSeriesForScheduleId(schedule.getScheduleId());
+            seriesForASchedule.forEach(series -> {
+                if (series.getExceptionId() > 0) {
+                    series.setException(exceptionDao.getExceptionForSeries(series.getExceptionId()));
+                }
+            });
+            schedule.setSeriesList(seriesForASchedule);
+        });
+        return scheduleList;
     }
 }

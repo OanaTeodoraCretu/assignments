@@ -1,14 +1,14 @@
 package com.geosatis.schedules.dao;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -29,9 +29,10 @@ public class ExceptionDao {
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private static final String CREATE_EXCEPTION = "INSERT INTO exceptions(for_date, new_start_time, new_end_time, is_active)" +
-            " VALUES (:forDate, :newStartTime, :newEndTime, :active)";
+            " VALUES (:for_date, :new_start_time, :new_end_time, :active)";
 
     private static final String UPDATE_EXCEPTION_BY_ID = "UPDATE exceptions SET " + UPDATE_COLUMNS_PLACEHOLDER + " WHERE exception_id = :exception_id";
+    private static final String GET_EXCEPTION_BY_ID = "SELECT * FROM exceptions WHERE exception_id = :exception_id";
 
 
     @Autowired
@@ -71,5 +72,29 @@ public class ExceptionDao {
             mapSqlParameterSource.addValue(entry.getKey(), entry.getValue());
         }
         return new QueryData("exceptions", UPDATE_EXCEPTION_BY_ID.replace(UPDATE_COLUMNS_PLACEHOLDER, updateQueryStringBuilder.toString().replaceAll(".$", "")), mapSqlParameterSource);
+    }
+
+    public Exception getExceptionForSeries(long exceptionId) {
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+        mapSqlParameterSource.addValue("exception_id", exceptionId);
+
+        return jdbcTemplate.query(GET_EXCEPTION_BY_ID, mapSqlParameterSource, new ExceptionRSE());
+    }
+
+    private static class ExceptionRSE implements ResultSetExtractor<Exception> {
+        @Override
+        public Exception extractData(ResultSet rs) throws SQLException, DataAccessException {
+            Exception exception = null;
+
+            if (rs.next()) {
+                exception = new Exception();
+                exception.setExceptionId(rs.getLong(1));
+                exception.setForDate(rs.getTimestamp(2).toInstant());
+                exception.setNewStartTime(rs.getTimestamp(3).toLocalDateTime().toLocalTime());
+                exception.setNewEndTime(rs.getTimestamp(4).toLocalDateTime().toLocalTime());
+                exception.setActive(rs.getBoolean(5));
+            }
+            return exception;
+        }
     }
 }
