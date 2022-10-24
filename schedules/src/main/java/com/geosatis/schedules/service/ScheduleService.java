@@ -54,7 +54,7 @@ public class ScheduleService {
         return scheduleDao.updateSchedule(scheduleId, newFieldValues);
     }
 
-    public List<Schedule> getSchedulesIdByDate(Timestamp date) {
+    public List<Schedule> getSchedulesByDate(Timestamp date) {
         List<Schedule> scheduleList = scheduleDao.getSchedulesIdByDate(date);
         scheduleList.forEach(schedule -> {
             List<Series> seriesForASchedule = seriesDao.getSeriesForScheduleId(schedule.getScheduleId());

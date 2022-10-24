@@ -12,7 +12,6 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Repository;
 
 import com.geosatis.schedules.entities.QueryData;
 import com.geosatis.schedules.entities.Schedule;
-import com.geosatis.schedules.entities.Series;
 import com.geosatis.schedules.util.DateConverter;
 
 @Repository
