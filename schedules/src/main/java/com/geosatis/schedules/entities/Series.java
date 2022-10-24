@@ -11,11 +11,11 @@ public class Series {
     private Long seriesId;
 
     @JsonProperty("start_hour")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime startHour;
 
     @JsonProperty("end_hour")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime endHour;
 
     @JsonProperty("freq_type_id")

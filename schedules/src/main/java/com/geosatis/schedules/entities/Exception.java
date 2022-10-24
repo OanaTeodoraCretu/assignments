@@ -15,11 +15,11 @@ public class Exception {
     private Instant forDate;
 
     @JsonProperty("new_start_time")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime newStartTime;
 
     @JsonProperty("new_end_time")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime newEndTime;
 
     private boolean active;
