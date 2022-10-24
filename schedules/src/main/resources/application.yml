@@ -8,7 +8,7 @@ spring:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:mysql://localhost:3306/schedulesdb
+    url: jdbc:mysql://db:3306/schedulesdb
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password:
